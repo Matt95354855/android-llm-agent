@@ -166,7 +166,9 @@ class Fleet:
     async def shutdown(self) -> None:
         if self._health_task:
             self._health_task.cancel()
-        if self.emulators:
+        # Les émulateurs survivent volontairement à l'arrêt du service : un redémarrage du contrôle
+        # ne doit pas coûter plusieurs minutes de démarrage Android. Les éteindre = action explicite.
+        if self.emulators and self.settings.stop_emulators_on_exit:
             for did in self.slots:
                 if self.emulators.is_running(did):
                     await self.emulators.stop(did)

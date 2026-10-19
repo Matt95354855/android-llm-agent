@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     emulator_gpu: str = "swiftshader_indirect"
     emulator_accel: Literal["auto", "off"] = "auto"
     emulator_stagger_s: float = 20.0  # démarrage échelonné (G08)
+    stop_emulators_on_exit: bool = False
 
     llm_base_url: str = "http://127.0.0.1:8001/v1"
     llm_model: str = "Qwen/Qwen3.6-27B"
