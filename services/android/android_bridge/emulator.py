@@ -12,7 +12,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from . import exclusions
-from .adb import Adb
+from .adb import Adb, AdbError
 from .device import AdbDevice
 
 log = logging.getLogger(__name__)
@@ -182,8 +182,11 @@ class EmulatorManager:
         while loop.time() < deadline:
             if inst.process and inst.process.returncode is not None:
                 raise RuntimeError(f"l'émulateur {inst.device_id} s'est arrêté (voir {inst.log_path})")
-            if await device.is_ready():
-                return
+            try:
+                if await device.is_ready():
+                    return
+            except (AdbError, OSError):  # adb encore indisponible pendant le démarrage
+                pass
             await asyncio.sleep(3)
         raise TimeoutError(f"{inst.device_id} n'a pas terminé son démarrage")
 

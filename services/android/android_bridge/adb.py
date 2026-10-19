@@ -48,7 +48,10 @@ class Adb:
         try:
             out, err = await asyncio.wait_for(proc.communicate(), timeout or self.default_timeout)
         except TimeoutError as exc:
-            proc.kill()
+            try:
+                proc.kill()
+            except ProcessLookupError:  # déjà terminé entre-temps
+                pass
             await proc.wait()
             raise AdbTimeout(f"délai dépassé : {shlex.join(args)}") from exc
         result = AdbResult(out, err, proc.returncode or 0)
