@@ -1,0 +1,26 @@
+{
+  "name": "phone-emulator-model",
+  "imageName": "vllm/vllm-openai:À_ÉPINGLER_APRÈS_L04",
+  "category": "NVIDIA",
+  "isServerless": false,
+  "isPublic": false,
+  "containerDiskInGb": 30,
+  "volumeInGb": 120,
+  "volumeMountPath": "/workspace",
+  "ports": ["8001/http", "22/tcp"],
+  "env": {
+    "HF_HOME": "/workspace/hf",
+    "VLLM_API_KEY": "{{ RUNPOD_SECRET_pe_llm_api_key }}"
+  },
+  "dockerStartCmd": [
+    "--model", "Qwen/Qwen3.8-27B",
+    "--revision", "À_ÉPINGLER",
+    "--port", "8001",
+    "--max-model-len", "32768",
+    "--max-num-seqs", "4",
+    "--enable-auto-tool-choice",
+    "--tool-call-parser", "À_CHOISIR_SELON_LA_RECETTE",
+    "--limit-mm-per-prompt", "{\"image\": 2}"
+  ],
+  "readme": "Service Qwen compatible OpenAI. Image, révision et parseur d'outils à épingler après qualification (tâches L04/L05)."
+}

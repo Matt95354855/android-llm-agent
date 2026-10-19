@@ -2,9 +2,29 @@
 
 Projet de plateforme web pour piloter **quatre Android avec Qwen3.8-27B auto-hébergé**, suivre leurs écrans en direct et exécuter des missions à partir d’un prompt.
 
-**État actuel : conception et qualification à réaliser.** Ce dépôt documente le produit prévu. Aucun déploiement Runpod, taux de réussite ou fonctionnement matériel n’est encore validé.
+**État actuel : socle logiciel en place, rien de validé sur Runpod.** Le service de contrôle, l’adaptateur Android et l’interface tournent en **mode démo** (appareils factices, clairement signalés). La boucle agent Qwen n’est pas encore branchée. Aucun déploiement Runpod, taux de réussite ou fonctionnement matériel n’est encore validé.
 
 Le [cahier des charges détaillé](docs/roadmap/CAHIER_DES_CHARGES.md) contient **420 tâches identifiées, 26 chantiers, des dépendances, des critères de sortie et 22 scénarios de recette finale**.
+
+## Ce qui existe dans le dépôt
+
+| Élément | Emplacement | État |
+|---|---|---|
+| Adaptateur Android (ADB, capture + arbre d’accessibilité, actions typées, saisie Unicode, exclusions caméra/micro/GPS, cycle de vie des émulateurs) | `services/android/android_bridge` | Écrit ; testé en démo ; tests réels dans le job CI `emulator` |
+| Service de contrôle (FastAPI) : appareils, contrôle manuel exclusif, missions, événements SSE rejouables, bibliothèque d’APK, authentification | `services/control/control` | Fonctionne en démo, 19 tests |
+| Interface web française sombre : mur 2×2, prise en main, prompt, missions, APK, journal | `apps/web` | Fonctionne en démo |
+| Image Pod, templates Runpod, diagnostic, contrôle préalable, outil Runpod plafonné | `infra/`, `scripts/` | Écrits, non exécutés sur Runpod |
+| Boucle agent (observer → décider → agir → vérifier) et orchestration des missions | — | **À faire** |
+
+## Démarrer en local (mode démo)
+
+```bash
+uv sync
+(cd apps/web && npm ci && npm run build)
+PE_ALLOW_NO_AUTH=1 PE_DEVICE_BACKEND=demo uv run phone-emulator
+```
+
+Puis ouvrir http://localhost:8000. Tests : `uv run pytest`. Tests sur un vrai Android : `PE_TEST_SERIAL=emulator-5554 uv run pytest -m emulator -o addopts=""`.
 
 ## Périmètre confirmé
 

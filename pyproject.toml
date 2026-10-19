@@ -1,0 +1,61 @@
+[project]
+name = "phone-emulator"
+version = "0.1.0"
+description = "Quatre Android pilotés par un agent Qwen auto-hébergé, sur Runpod."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115,<1",
+  "uvicorn[standard]>=0.30,<1",
+  "pydantic>=2.9,<3",
+  "pydantic-settings>=2.5,<3",
+  "httpx>=0.27,<1",
+  "sqlalchemy[asyncio]>=2.0.35,<2.1",
+  "aiosqlite>=0.20,<1",
+  "python-multipart>=0.0.12",
+]
+
+[project.optional-dependencies]
+postgres = ["asyncpg>=0.29,<1"]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-asyncio>=0.24,<1",
+  "ruff>=0.7",
+]
+
+[project.scripts]
+phone-emulator = "control.main:run"
+
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["services/android/android_bridge", "services/control/control"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+pythonpath = ["services/android", "services/control"]
+testpaths = ["tests"]
+markers = ["emulator: nécessite un Android réel joignable par ADB (CI émulateur)"]
+addopts = "-m 'not emulator'"
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+src = ["services/android", "services/control", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "ASYNC"]
+# B008 : idiome FastAPI (File, Body). ASYNC109 : délais explicites voulus sur les appels ADB.
+ignore = ["E501", "B008", "ASYNC109"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["android_bridge", "control"]
+
+[tool.ruff.lint.per-file-ignores]
+# Écriture par blocs d'un téléchargement en cours : acceptable dans ce chemin.
+"services/control/control/apks.py" = ["ASYNC230", "ASYNC240"]

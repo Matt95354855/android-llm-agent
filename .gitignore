@@ -1,0 +1,49 @@
+# Données d'exploitation : jamais dans le dépôt public (D06)
+/data/
+/workspace/
+*.apk
+*.apks
+*.xapk
+*.aab
+*.img
+*.qcow2
+*.avd/
+*.ini.lock
+*.safetensors
+*.gguf
+*.bin
+captures/
+recordings/
+*.log
+
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*_ed25519
+*_rsa
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# Web
+node_modules/
+apps/web/dist/
+
+# Divers
+.DS_Store
+.idea/
+.vscode/
+
+# Configuration locale de l’outil de développement
+.claude/
+*.tsbuildinfo
