@@ -79,7 +79,9 @@ async def test_egress_ip_is_measured_from_android(device):
             "getprop net.dns1; getprop net.eth0.dns1",
             "ping -c1 -W3 api.ipify.org 2>&1 | head -3",
             "ping -c1 -W3 8.8.8.8 2>&1 | head -3",
-            "printf 'GET / HTTP/1.0\\r\\nHost: api.ipify.org\\r\\n\\r\\n' | toybox nc api.ipify.org 80 2>&1 | head -20",
+            "(printf 'GET / HTTP/1.0\\r\\nHost: api.ipify.org\\r\\n\\r\\n'; sleep 8) | toybox nc -4 -w 8 -W 4 api.ipify.org 80 2>&1 | head -20",
+            "(printf 'GET / HTTP/1.0\\r\\nHost: 104.26.12.205\\r\\n\\r\\n'; sleep 8) | toybox nc -w 8 -W 4 104.26.12.205 80 2>&1 | head -5",
+            "toybox nc -4 -w 5 -W 2 api.ipify.org 80 < /dev/null; echo code=$?",
         ):
             print(f"$ {cmd}\n{await device.adb.shell(cmd, check=False)}")
     assert ip, method

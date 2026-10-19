@@ -32,7 +32,8 @@ async def egress_ip(adb: Adb) -> tuple[str | None, str]:
         request = shlex.quote(
             f"GET {path} HTTP/1.0\\r\\nHost: {host}\\r\\nUser-Agent: phone-emulator\\r\\n\\r\\n"
         )
-        out = await _try(adb, f"printf {request} | toybox nc {host} 80")
+        # toybox nc s'arrête à la fin de stdin : on la garde ouverte jusqu'à la fermeture par le serveur.
+        out = await _try(adb, f"(printf {request}; sleep 8) | toybox nc -4 -w 8 -W 4 {host} 80")
         if ip := parse_ip(out.split("\r\n\r\n", 1)[-1]):
             return ip, f"nc http://{host}"
     return None, "aucune méthode n'a abouti"
