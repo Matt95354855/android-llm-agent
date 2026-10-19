@@ -72,5 +72,8 @@ class Adb:
         return res.stdout
 
     async def get_state(self) -> str:
-        res = await self.run("get-state", timeout=5, check=False)
+        try:  # le premier appel démarre le serveur adb, parfois lentement
+            res = await self.run("get-state", timeout=30, check=False)
+        except AdbError:
+            return "offline"
         return res.text.strip() if res.returncode == 0 else "offline"

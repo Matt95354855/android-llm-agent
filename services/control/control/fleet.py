@@ -32,6 +32,7 @@ class _Slot:
         self.io_lock = asyncio.Lock()  # une seule mutation à la fois par téléphone
         self.last_screen: tuple[bytes, float] | None = None
         self.screen_lock = asyncio.Lock()
+        self.failures = 0
 
 
 class Fleet:
@@ -134,7 +135,11 @@ class Fleet:
         slot.backend = None
         await self._set_state(device_id, DeviceState.stopped)
 
-    def run_health_loop(self, interval_s: float = 10.0) -> None:
+    @property
+    def _health_timeout(self) -> float:
+        return 90.0 if self.settings.emulator_accel == "off" else 20.0
+
+    def run_health_loop(self, interval_s: float = 15.0) -> None:
         async def loop() -> None:
             while True:
                 await asyncio.sleep(interval_s)
@@ -142,14 +147,18 @@ class Fleet:
                     if slot.backend is None or slot.info.state in (DeviceState.booting, DeviceState.stopped):
                         continue
                     try:
-                        ok = await asyncio.wait_for(slot.backend.is_ready(), 15)
+                        ok = await asyncio.wait_for(slot.backend.is_ready(), self._health_timeout)
                     except Exception:
                         ok = False
                     if ok:
+                        slot.failures = 0
                         slot.info.last_seen_at = utcnow()
                         if slot.info.state in (DeviceState.offline, DeviceState.error):
                             await self._set_state(did, DeviceState.ready)
-                    elif slot.info.state not in (DeviceState.offline, DeviceState.error):
+                        continue
+                    slot.failures += 1
+                    # Hors ligne seulement après plusieurs échecs : sous charge, une réponse lente n'est pas une panne.
+                    if slot.failures >= 3 and slot.info.state not in (DeviceState.offline, DeviceState.error):
                         await self._set_state(did, DeviceState.offline)
 
         self._health_task = asyncio.create_task(loop())
