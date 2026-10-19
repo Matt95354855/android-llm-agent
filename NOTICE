@@ -1,0 +1,17 @@
+phone_emulator
+Copyright (c) 2026 Matt95354855 and contributors — sous licence MIT (voir LICENSE).
+
+Composants tiers
+================
+
+Dépendances Python et JavaScript : voir uv.lock et apps/web/package-lock.json ; chacune
+reste sous sa propre licence (FastAPI, Starlette, Pydantic, SQLAlchemy, httpx, Uvicorn,
+React, Vite…).
+
+Non redistribués par ce dépôt ni par l'image publiée
+-----------------------------------------------------
+- Android SDK, Android Emulator et images système : téléchargés au premier démarrage du Pod,
+  dans le volume persistant, après acceptation explicite de leurs licences par l'exploitant
+  (variable PE_ACCEPT_ANDROID_SDK_LICENSES=1). Soumis au contrat de licence du SDK Android.
+- ADBKeyBoard (GPL-2.0) : à déposer par l'exploitant dans $PE_DATA_DIR/tools/ADBKeyboard.apk.
+- Poids Qwen : téléchargés par le Pod modèle depuis Hugging Face, sous la licence du modèle choisi.

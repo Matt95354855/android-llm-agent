@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from android_bridge import exclusions
+from android_bridge import exclusions, network
 from android_bridge.actions import Key, OpenApp, Shell, Tap, TypeText
 from android_bridge.adb import Adb
 from android_bridge.device import AdbDevice
@@ -67,3 +67,9 @@ async def test_exclusions_hold(device):
     assert not report.packages_with_grants
     blocked = await device.execute(Shell(command="pm grant com.android.chrome android.permission.CAMERA"))
     assert blocked.status == "rejected"
+
+
+async def test_egress_ip_is_measured_from_android(device):
+    ip, method = await network.egress_ip(device.adb)
+    print("egress:", ip, method)
+    assert ip, method

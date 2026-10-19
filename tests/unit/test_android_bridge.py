@@ -5,6 +5,7 @@ from android_bridge.actions import Tap, TypeText
 from android_bridge.demo import DemoDevice
 from android_bridge.device import escape_input_text
 from android_bridge.exclusions import shell_command_violation
+from android_bridge.network import parse_ip
 from android_bridge.uitree import parse_uiautomator_xml, render_for_model
 
 XML = """UI hierchary dumped to: /dev/tty<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
@@ -71,3 +72,8 @@ async def test_demo_device_reacts_to_taps_and_text():
     assert any(n.text == "Valeur : 1" for n in obs2.ui_nodes)
     assert any(n.text == "Été à Noël ✓" for n in obs2.ui_nodes)
     assert obs2.screenshot_sha256 != obs.screenshot_sha256
+
+
+def test_parse_ip_from_http_body():
+    assert parse_ip("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n203.0.113.7\n") == "203.0.113.7"
+    assert parse_ip("<html>erreur</html>") is None

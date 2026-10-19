@@ -152,6 +152,19 @@ export function PhoneTile({ device, mission, expanded, onToggleExpand, onChanged
           </div>
         )}
       </div>
+      <div className="mission-line" title="IP publique observée depuis Android">
+        IP de sortie :{" "}
+        {device.egress_ip
+          ? `${device.egress_ip} (vérifiée à ${new Date(device.egress_checked_at!).toLocaleTimeString("fr-FR")})`
+          : device.egress_checked_at
+            ? "non mesurée"
+            : "jamais vérifiée"}
+        {live && (
+          <button style={{ marginLeft: 8, padding: "0 8px" }} onClick={() => run(() => api.checkEgress(device.id))}>
+            Vérifier
+          </button>
+        )}
+      </div>
       {run_ && <div className="mission-line" title={run_.goal}>Mission : {run_.goal}</div>}
       <footer>
         {live && !manual && (

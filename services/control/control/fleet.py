@@ -6,7 +6,7 @@ import asyncio
 import logging
 from pathlib import Path
 
-from android_bridge import exclusions
+from android_bridge import exclusions, network
 from android_bridge.actions import DeviceAction
 from android_bridge.demo import DemoDevice
 from android_bridge.device import AdbDevice, DeviceBackend
@@ -184,6 +184,23 @@ class Fleet:
         async with slot.io_lock:
             self.locks.validate(lease)  # dernier contrôle avant injection (N05, O13)
             return await self.backend(lease.device_id).execute(action)
+
+    async def check_egress(self, device_id: str) -> DeviceInfo:
+        """Mesure l'IP de sortie depuis l'Android et la conserve avec sa date (C14)."""
+        backend = self.backend(device_id)
+        info = self._slot(device_id).info
+        if isinstance(backend, AdbDevice):
+            ip, method = await network.egress_ip(backend.adb)
+        else:
+            ip, method = None, "appareil de démonstration : pas de réseau réel"
+        info.egress_ip, info.egress_checked_at = ip, utcnow()
+        await self.bus.emit(
+            "device.egress",
+            f"{info.name} : IP de sortie {ip or 'non mesurée'}",
+            device_id=device_id,
+            data={"ip": ip, "method": method},
+        )
+        return info
 
     def mark_controller(
         self, device_id: str, kind: Controller, run_id: str | None = None, mission_id: str | None = None

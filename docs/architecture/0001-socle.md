@@ -16,4 +16,4 @@ Date : 19 octobre 2026. Statut : accepté pour le prototype, à réviser après 
 
 - KVM et quatre IP de sortie fixes sur Runpod (B, C) : non mesurés.
 - Saisie Unicode : dépend d'ADBKeyBoard (GPL-2.0), à déposer dans `$PE_DATA_DIR/tools/ADBKeyboard.apk` et jamais redistribué dans l'image ; alternative à évaluer avec le portail Mobilerun.
-- Licence du code original : décision du propriétaire.
+- Licence : MIT, retenue par le propriétaire le 19 octobre 2026 (voir LICENSE et NOTICE).

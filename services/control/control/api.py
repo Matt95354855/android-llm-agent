@@ -216,6 +216,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         obs = await fleet.observe(device_id)
         return obs.model_dump(mode="json")
 
+    @app.post("/api/devices/{device_id}/egress")
+    async def device_egress(device_id: str):
+        return (await fleet.check_egress(device_id)).model_dump(mode="json")
+
     @app.get("/api/devices/{device_id}/compliance")
     async def device_compliance(device_id: str):
         backend = fleet.backend(device_id)

@@ -11,9 +11,10 @@
   "env": {
     "PE_ACCESS_TOKEN": "{{ RUNPOD_SECRET_pe_access_token }}",
     "PE_DEVICE_COUNT": "4",
+    "PE_ACCEPT_ANDROID_SDK_LICENSES": "0",
     "PE_LLM_BASE_URL": "https://<pod-modele>-8001.proxy.runpod.net/v1",
     "PE_LLM_API_KEY": "{{ RUNPOD_SECRET_pe_llm_api_key }}",
     "PE_LLM_MODEL": "Qwen/Qwen3.8-27B"
   },
-  "readme": "Quatre Android + service de contrôle + interface web. Nécessite /dev/kvm : lancer d'abord scripts/runpod_diag.sh sur le profil choisi."
+  "readme": "Quatre Android + service de contrôle + interface web. Nécessite /dev/kvm : lancer d'abord scripts/runpod_diag.sh sur le profil choisi. Passer PE_ACCEPT_ANDROID_SDK_LICENSES à 1 après lecture des licences du SDK Android pour qu'il soit installé dans /workspace."
 }

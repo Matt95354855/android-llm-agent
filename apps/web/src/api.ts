@@ -104,6 +104,7 @@ export const api = {
   devices: () => call<Device[]>("/api/devices"),
   startDevice: (id: string) => post(`/api/devices/${id}/start`),
   stopDevice: (id: string) => post(`/api/devices/${id}/stop`),
+  checkEgress: (id: string) => post<Device>(`/api/devices/${id}/egress`),
   takeControl: (id: string) => post(`/api/devices/${id}/control`),
   releaseControl: (id: string) => call(`/api/devices/${id}/control`, { method: "DELETE" }),
   action: (id: string, action: Record<string, unknown>) => post(`/api/devices/${id}/actions`, action),
