@@ -32,6 +32,7 @@ from .actions import (
 )
 from .adb import Adb, AdbError, AdbTimeout
 from .models import ActionOutcome, Observation, OutcomeStatus, utcnow
+from .png import raw_screencap_to_png
 from .uitree import parse_uiautomator_xml
 
 ADB_KEYBOARD_IME = "com.android.adbkeyboard/.AdbIME"
@@ -113,7 +114,12 @@ class AdbDevice:
         return "mInputShown=true" in out
 
     async def screenshot(self) -> bytes:
-        png = await self.adb.exec_out("screencap -p", timeout=15)
+        # Pixels bruts puis compression côté serveur : `screencap -p` compresse sur l'appareil,
+        # ce qui prend plusieurs secondes en émulation logicielle.
+        raw = await self.adb.exec_out("screencap")
+        png = await asyncio.to_thread(raw_screencap_to_png, raw)
+        if png is None:
+            png = await self.adb.exec_out("screencap -p")
         if not png.startswith(b"\x89PNG"):
             raise AdbError("capture d'écran invalide")
         return png
@@ -122,7 +128,6 @@ class AdbDevice:
         return (
             await self.adb.exec_out(
                 "sh -c 'uiautomator dump /sdcard/.pe_ui.xml >/dev/null 2>&1 && cat /sdcard/.pe_ui.xml'",
-                timeout=20,
             )
         ).decode("utf-8", errors="replace")
 

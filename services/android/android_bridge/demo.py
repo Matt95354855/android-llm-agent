@@ -7,31 +7,14 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
-import struct
-import zlib
 
 from .actions import ClearField, DeviceAction, Key, OpenApp, Swipe, Tap, TypeText, Wait
 from .models import ActionOutcome, Bounds, Observation, OutcomeStatus, UiNode, utcnow
+from .png import encode_png
 
 W, H = 720, 1280
 BG = (18, 20, 26)
 HEADER = [(61, 90, 254), (0, 150, 136), (233, 30, 99), (255, 152, 0)]
-
-
-def encode_png(width: int, height: int, rows: list[bytes]) -> bytes:
-    def chunk(tag: bytes, data: bytes) -> bytes:
-        return (
-            struct.pack(">I", len(data)) + tag + data + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
-        )
-
-    raw = b"".join(b"\x00" + r for r in rows)
-    ihdr = struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)
-    return (
-        b"\x89PNG\r\n\x1a\n"
-        + chunk(b"IHDR", ihdr)
-        + chunk(b"IDAT", zlib.compress(raw, 6))
-        + chunk(b"IEND", b"")
-    )
 
 
 class DemoDevice:
@@ -98,7 +81,7 @@ class DemoDevice:
             rect(40, 220, 40 + bar, 280, (255, 255, 255))
         if self.note:
             rect(60, 600, 60 + min(600, 12 * len(self.note)), 640, (200, 200, 210))
-        return encode_png(W, H, [bytes(r) for r in rows])
+        return encode_png(W, H, b"".join(bytes(r) for r in rows))
 
     async def screenshot(self) -> bytes:
         return await asyncio.to_thread(self._render)

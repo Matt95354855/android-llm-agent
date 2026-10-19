@@ -171,6 +171,7 @@ class EmulatorManager:
                 stdout=logf,
                 stderr=asyncio.subprocess.STDOUT,
                 env=self._env,
+                start_new_session=True,  # survit à un redémarrage du service de contrôle
             )
         device = AdbDevice(device_id, inst.serial, Adb(inst.serial, default_timeout=self.adb_timeout))
         await self._wait_boot(inst, device)

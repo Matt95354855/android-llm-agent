@@ -77,3 +77,15 @@ async def test_demo_device_reacts_to_taps_and_text():
 def test_parse_ip_from_http_body():
     assert parse_ip("HTTP/1.0 200 OK\r\nContent-Type: text/plain\r\n\r\n203.0.113.7\n") == "203.0.113.7"
     assert parse_ip("<html>erreur</html>") is None
+
+
+def test_raw_screencap_is_encoded_server_side():
+    import struct
+
+    from android_bridge.png import raw_screencap_to_png
+
+    w, h = 4, 2
+    raw = struct.pack("<IIII", w, h, 1, 0) + bytes([255, 0, 0, 255]) * (w * h)
+    png = raw_screencap_to_png(raw)
+    assert png.startswith(b"\x89PNG") and b"IHDR" in png
+    assert raw_screencap_to_png(b"court") is None

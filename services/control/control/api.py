@@ -16,6 +16,7 @@ from pydantic import BaseModel, TypeAdapter
 
 from android_bridge import exclusions
 from android_bridge.actions import DeviceAction, InstallApk
+from android_bridge.adb import AdbError
 from android_bridge.device import AdbDevice
 
 from .apks import ApkInvalid, ApkLibrary
@@ -116,6 +117,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         return JSONResponse(
             ApiError(code="device_unavailable", message=str(exc), retryable=True).model_dump(),
             status_code=409,
+        )
+
+    @app.exception_handler(AdbError)
+    async def _adb_error(_: Request, exc: AdbError):
+        return JSONResponse(
+            ApiError(
+                code="device_slow", message=f"Le téléphone n'a pas répondu à temps : {exc}", retryable=True
+            ).model_dump(),
+            status_code=503,
         )
 
     @app.exception_handler(KeyError)
