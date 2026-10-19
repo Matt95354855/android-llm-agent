@@ -150,7 +150,8 @@ class EmulatorManager:
     async def start(self, device_id: str) -> AdbDevice:
         inst = self.instances[device_id]
         await self.ensure_avd(device_id)
-        if inst.process is None or inst.process.returncode is not None:
+        already_up = await Adb(inst.serial).get_state() == "device"
+        if not already_up and (inst.process is None or inst.process.returncode is not None):
             inst.log_path = self.log_dir / f"{device_id}-emulator.log"
             logf = inst.log_path.open("ab")
             inst.process = await asyncio.create_subprocess_exec(
@@ -171,7 +172,7 @@ class EmulatorManager:
                 stderr=asyncio.subprocess.STDOUT,
                 env=self._env,
             )
-        device = AdbDevice(device_id, inst.serial)
+        device = AdbDevice(device_id, inst.serial, Adb(inst.serial, default_timeout=self.adb_timeout))
         await self._wait_boot(inst, device)
         await self.provision(device)
         return device
@@ -193,8 +194,8 @@ class EmulatorManager:
     async def provision(self, device: AdbDevice) -> None:
         """Réglages idempotents appliqués à chaque démarrage (F08, F11, J03–J05)."""
         adb = device.adb
-        await adb.run("root", check=False, timeout=30)
-        await adb.run("wait-for-device", timeout=60)
+        await _tolerant(adb.run("root", check=False, timeout=60))
+        await _tolerant(adb.run("wait-for-device", timeout=120))
         p = self.profile
         for cmd in (
             f"setprop persist.sys.locale {p.locale}",
@@ -204,12 +205,12 @@ class EmulatorManager:
             "settings put global animator_duration_scale 0",
             "svc power stayon true",
         ):
-            await adb.shell(cmd, check=False)
+            await _tolerant(adb.shell(cmd, check=False))
         kb = self.tools_dir / "ADBKeyboard.apk"
         if kb.exists() and "com.android.adbkeyboard" not in await adb.shell("pm list packages", check=False):
             await adb.run("install", "-r", str(kb), timeout=120, check=False)
             await adb.shell("ime enable com.android.adbkeyboard/.AdbIME", check=False)
-        await exclusions.enforce(adb)
+        await _tolerant(exclusions.enforce(adb), what="exclusions")
 
     async def stop(self, device_id: str, timeout: float = 60) -> None:
         inst = self.instances[device_id]
@@ -222,6 +223,18 @@ class EmulatorManager:
                 await inst.process.wait()
         inst.process = None
 
+    @property
+    def adb_timeout(self) -> float:
+        return 90.0 if self.profile.accel == "off" else 20.0
+
     def is_running(self, device_id: str) -> bool:
         p = self.instances[device_id].process
         return p is not None and p.returncode is None
+
+
+async def _tolerant(coro, what: str = "réglage") -> None:
+    """Un réglage lent ou refusé est journalisé sans empêcher l'appareil d'être utilisable."""
+    try:
+        await coro
+    except AdbError as exc:
+        log.warning("%s non appliqué : %s", what, exc)
