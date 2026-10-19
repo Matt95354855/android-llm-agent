@@ -72,4 +72,14 @@ async def test_exclusions_hold(device):
 async def test_egress_ip_is_measured_from_android(device):
     ip, method = await network.egress_ip(device.adb)
     print("egress:", ip, method)
+    if not ip:
+        for cmd in (
+            "which curl nc toybox wget",
+            "toybox nc --help 2>&1 | head -20",
+            "getprop net.dns1; getprop net.eth0.dns1",
+            "ping -c1 -W3 api.ipify.org 2>&1 | head -3",
+            "ping -c1 -W3 8.8.8.8 2>&1 | head -3",
+            "printf 'GET / HTTP/1.0\\r\\nHost: api.ipify.org\\r\\n\\r\\n' | toybox nc api.ipify.org 80 2>&1 | head -20",
+        ):
+            print(f"$ {cmd}\n{await device.adb.shell(cmd, check=False)}")
     assert ip, method
