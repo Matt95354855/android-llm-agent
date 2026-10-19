@@ -165,7 +165,7 @@ class EmulatorManager:
                 "-gpu",
                 self.profile.gpu,
                 "-accel",
-                "auto",
+                self.profile.accel,
                 *exclusions.EMULATOR_FLAGS,
                 stdout=logf,
                 stderr=asyncio.subprocess.STDOUT,
