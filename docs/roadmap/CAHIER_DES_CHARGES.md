@@ -10,7 +10,7 @@ Ce document décrit le produit à construire. Les fonctionnalités des projets c
 |---|---|
 | Appareils | Quatre vrais environnements Android distincts, visibles et contrôlables en direct. |
 | Applications | Les applications du propriétaire, distribuées sous forme d’APK téléchargés depuis Internet. |
-| Agent | Qwen3.8-27B auto-hébergé ; variante communautaire uncensored à qualifier. Il doit lire les écrans, comprendre la mission et exécuter les actions. |
+| Agent | Qwen3.6-27B officiel auto-hébergé, sans variante modifiée. Il doit lire les écrans, comprendre la mission et exécuter les actions. |
 | Autonomie | Contrôle étendu des applications, paramètres et fichiers Android ; pas de script figé comme unique mode de fonctionnement. |
 | Exclusions explicites | Pas de GPS, de caméra ou de microphone. Pas de géolocalisation simulée proposée à l’agent. |
 | Missions | Missions indépendantes en parallèle et mission commune répartie entre les quatre téléphones. |
@@ -80,7 +80,7 @@ flowchart TD
     U[Interface web française : prompt et 4 écrans] --> API[API missions et événements]
     API --> ORCH[Orchestrateur persistant et attribution des appareils]
     ORCH --> DB[(Missions, états, événements et verrous)]
-    ORCH --> Q[Service Qwen3.8-27B partagé sur GPU]
+    ORCH --> Q[Service Qwen3.6-27B partagé sur GPU]
     ORCH --> W1[Worker Android 1]
     ORCH --> W2[Worker Android 2]
     ORCH --> W3[Worker Android 3]
@@ -139,9 +139,9 @@ Une action dont le résultat est inconnu après une coupure doit être vérifié
 
 ## 6. Qwen et dimensionnement de départ
 
-Qwen3.8-27B officiel est un modèle dense multimodal, sous Apache-2.0, avec entrée image et vidéo. Garder cette version comme référence de comparaison. Les variantes communautaires à qualifier comprennent [OrcaRouter FP8](https://huggingface.co/orcarouter/Qwen3.8-27B-Uncensored-FP8) et [Huihui](https://huggingface.co/huihui-ai/Huihui-Qwen3.8-27B-abliterated). Leur intitulé ne suffit pas à démontrer vision, appels d’outils ou réussite sur Android. [Carte officielle Qwen](https://huggingface.co/Qwen/Qwen3.8-27B)
+Le modèle retenu est **Qwen3.6-27B officiel** ([carte Hugging Face](https://huggingface.co/Qwen/Qwen3.6-27B)), dense, multimodal (entrée image), sous Apache-2.0. Aucune variante communautaire modifiée (« uncensored », « abliterated ») n'est utilisée : décision du propriétaire du 19 octobre 2026. Des quantifications officielles ou équivalentes peuvent être comparées, à condition de conserver vision et appels d'outils.
 
-La recette d’un moteur ne garantit pas toutes les combinaisons image + outil + plusieurs tours. Épingler la version du moteur, son parseur et le template, puis tester ce chemin complet. Vérifier aussi qu’un réglage tel que `language-model-only` ne désactive pas la vision. [Recette vLLM](https://recipes.vllm.ai/Qwen/Qwen3.8-27B), [recette SGLang](https://docs.sglang.io/cookbook/autoregressive/Qwen/Qwen3.8-27B)
+La recette d’un moteur ne garantit pas toutes les combinaisons image + outil + plusieurs tours. Épingler la version du moteur, son parseur et le template, puis tester ce chemin complet. Vérifier aussi qu’un réglage tel que `language-model-only` ne désactive pas la vision. [Recette vLLM](https://recipes.vllm.ai/Qwen/Qwen3.6-27B), [recette SGLang](https://docs.sglang.io/cookbook/autoregressive/Qwen/Qwen3.6-27B)
 
 | Ressource | Enveloppe d’essai proposée, à mesurer |
 |---|---|
@@ -425,7 +425,7 @@ Ces seuils constituent une proposition initiale. Les figer après caractérisati
 **Dépendance :** A ; test Android pour la qualification finale. **Sortie :** modèle vision + outils fonctionnel et versionné.
 
 - [ ] L01 — Enregistrer identifiant exact, révision et licence du modèle officiel servant de référence.
-- [ ] L02 — Sélectionner une variante uncensored candidate et enregistrer les mêmes informations, sans la choisir uniquement sur son nom.
+- [ ] L02 — Comparer si besoin des quantifications du modèle officiel (FP8, 4 bits) sur vision, outils et latence, en enregistrant révision et licence.
 - [ ] L03 — Inspecter présence de la tour vision, du processeur image et des fichiers nécessaires au moteur retenu.
 - [ ] L04 — Comparer vLLM et SGLang sur le GPU candidat, en utilisant les recettes correspondant aux versions installées.
 - [ ] L05 — Épingler image du serveur, template de conversation, parseur d’outils et parseur de raisonnement.
@@ -713,7 +713,7 @@ Ces seuils constituent une proposition initiale. Les figer après caractérisati
 - [ ] Y12 — Tester une mission commune comportant dépendances, panne partielle et synthèse finale.
 - [ ] Y13 — Couper ADB, le flux, un worker et le serveur modèle, séparément, puis mesurer la récupération.
 - [ ] Y14 — Couper l’orchestrateur après injection d’action et vérifier qu’il réobserve au lieu de répéter aveuglément.
-- [ ] Y15 — Comparer modèle officiel et uncensored avec mêmes tâches, données initiales et versions d’outils.
+- [ ] Y15 — Comparer les quantifications retenues du modèle officiel avec mêmes tâches, données initiales et versions d’outils.
 - [ ] Y16 — Mesurer réussite réelle, faux succès, durée, nombre de gestes, tokens et mémoire pour chaque scénario.
 - [ ] Y17 — Utiliser AndroidWorld comme complément de méthode ou de benchmark, avec configuration et périmètre documentés.
 - [ ] Y18 — Exécuter tests de contrat et tests unitaires sur routage, verrous, reprise et coordonnées, où une régression aurait un effet réel.
@@ -806,7 +806,7 @@ Les exigences déjà confirmées ne sont pas à redemander. Les points suivants 
 | Faut-il entendre le son de sortie des applications ? | Pas d’audio dans l’interface initiale ; microphone toujours désactivé. | Avant K final. |
 | Quelle conservation des captures et vidéos ? | Captures utiles par mission ; vidéo seulement à la demande ; durée réglable. | P/U. |
 | Plusieurs Pods Runpod sont-ils acceptés ? | Oui si tous restent sur Runpod et l’interface demeure unique ; vérifier ce point avant allocation. | B/C. |
-| Quel GPU et quelle variante uncensored exacte ? | Choix par benchmark, référence officielle conservée. | L. |
+| Quel GPU et quelle quantification ? | Qwen3.6-27B officiel ; quantification et GPU choisis par benchmark. | L. |
 | Faut-il un domaine dédié pour l’interface ? | Accès fourni par le déploiement Runpod pour le prototype, authentifié. | W. |
 | Licence du code original public ? | Choisir une licence permissive compatible avec les composants retenus ; décision du propriétaire. | D. |
 

@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     emulator_stagger_s: float = 20.0  # démarrage échelonné (G08)
 
     llm_base_url: str = "http://127.0.0.1:8001/v1"
-    llm_model: str = "Qwen/Qwen3.8-27B"
+    llm_model: str = "Qwen/Qwen3.6-27B"
     llm_api_key: str = "EMPTY"
     llm_max_concurrency: int = 4
     llm_timeout_s: float = 180

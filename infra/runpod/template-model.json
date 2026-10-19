@@ -13,7 +13,7 @@
     "VLLM_API_KEY": "{{ RUNPOD_SECRET_pe_llm_api_key }}"
   },
   "dockerStartCmd": [
-    "--model", "Qwen/Qwen3.8-27B",
+    "--model", "Qwen/Qwen3.6-27B",
     "--revision", "À_ÉPINGLER",
     "--port", "8001",
     "--max-model-len", "32768",

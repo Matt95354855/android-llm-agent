@@ -1,6 +1,6 @@
 # phone_emulator
 
-Projet de plateforme web pour piloter **quatre Android avec Qwen3.8-27B auto-hébergé**, suivre leurs écrans en direct et exécuter des missions à partir d’un prompt.
+Projet de plateforme web pour piloter **quatre Android avec Qwen3.6-27B auto-hébergé**, suivre leurs écrans en direct et exécuter des missions à partir d’un prompt.
 
 **État actuel : socle logiciel en place, rien de validé sur Runpod.** Le service de contrôle, l’adaptateur Android et l’interface tournent en **mode démo** (appareils factices, clairement signalés). La boucle agent Qwen n’est pas encore branchée. Aucun déploiement Runpod, taux de réussite ou fonctionnement matériel n’est encore validé.
 
@@ -32,7 +32,7 @@ Puis ouvrir http://localhost:8000. Tests : `uv run pytest`. Tests sur un vrai An
 - Agent qui lit le contenu de l’écran, choisit les actions et vérifie leur résultat.
 - Missions indépendantes en parallèle et mission commune répartie entre appareils.
 - Interface web en français, sombre par défaut, avec prompt, quatre écrans, historique et contrôle manuel.
-- Modèle Qwen3.8-27B avec vision et outils ; variante communautaire uncensored à comparer au modèle officiel.
+- Modèle Qwen3.6-27B officiel (Apache-2.0) avec vision et outils, sans variante modifiée.
 - Accès Android étendu, avec **GPS, caméra et microphone exclus**.
 - Hébergement d’exécution entièrement sur Runpod et démarrage/arrêt manuels.
 - Quatre IP publiques de sortie différentes, réservées et conservées après arrêt/redémarrage.
