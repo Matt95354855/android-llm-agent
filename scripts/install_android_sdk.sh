@@ -28,7 +28,7 @@ if [[ ! -x "$SDK/cmdline-tools/latest/bin/sdkmanager" ]]; then
   rm -rf "$tmp"
 fi
 export ANDROID_SDK_ROOT="$SDK"
-yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
+yes | "$SDK/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true  # SIGPIPE de yes attendu
 "$SDK/cmdline-tools/latest/bin/sdkmanager" --install "platform-tools" "emulator" "$IMAGE"
 "$SDK/cmdline-tools/latest/bin/sdkmanager" --list_installed > "$SDK/INSTALLED.txt"
 echo "$IMAGE" > "$MARKER"
