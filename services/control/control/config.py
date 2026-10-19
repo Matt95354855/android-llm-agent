@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     android_sdk_root: Path = Path("/opt/android-sdk")
     android_system_image: str = "system-images;android-30;google_apis;x86_64"
     emulator_gpu: str = "swiftshader_indirect"
+    emulator_accel: Literal["auto", "off"] = "auto"
     emulator_stagger_s: float = 20.0  # démarrage échelonné (G08)
 
     llm_base_url: str = "http://127.0.0.1:8001/v1"

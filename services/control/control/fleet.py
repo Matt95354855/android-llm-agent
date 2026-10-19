@@ -50,7 +50,11 @@ class Fleet:
             self.emulators = EmulatorManager(
                 Path(settings.android_sdk_root),
                 Path(settings.data_dir),
-                EmulatorProfile(system_image=settings.android_system_image, gpu=settings.emulator_gpu),
+                EmulatorProfile(
+                    system_image=settings.android_system_image,
+                    gpu=settings.emulator_gpu,
+                    accel=settings.emulator_accel,
+                ),
                 settings.device_ids,
             )
             for did, inst in self.emulators.instances.items():

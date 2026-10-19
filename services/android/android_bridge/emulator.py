@@ -25,12 +25,13 @@ class EmulatorProfile(BaseModel):
     height: int = 1280
     density: int = 320
     ram_mb: int = 3072
-    data_partition: str = "8G"
+    data_partition: str = "6G"
     cores: int = 2
     gpu: str = "swiftshader_indirect"
+    accel: str = "auto"  # "off" quand /dev/kvm est absent (émulation logicielle, très lente)
     locale: str = "fr-FR"
     timezone: str = "Europe/Paris"
-    boot_timeout_s: float = 900
+    boot_timeout_s: float = 2400
 
 
 @dataclass
