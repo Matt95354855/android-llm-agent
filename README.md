@@ -1,72 +1,60 @@
-# phone_emulator
+# phone_emulator — LLM agent driving four Android devices
 
-Projet de plateforme web pour piloter **quatre Android avec Qwen3.6-27B auto-hébergé**, suivre leurs écrans en direct et exécuter des missions à partir d’un prompt.
+**A web platform to run missions on four Android emulators from a single prompt, with a self-hosted vision LLM (Qwen3.6-27B) that reads the screen, acts and verifies.** Live 2×2 screen wall, exclusive manual takeover, APK library and replayable event log.
 
-**État actuel : socle logiciel en place, rien de validé sur Runpod.** Le service de contrôle, l’adaptateur Android et l’interface tournent en **mode démo** (appareils factices, clairement signalés). La boucle agent Qwen n’est pas encore branchée. Aucun déploiement Runpod, taux de réussite ou fonctionnement matériel n’est encore validé.
+[![CI](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml/badge.svg)](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/Python-3.11-3776AB) ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688) ![React](https://img.shields.io/badge/UI-React%20%2B%20Vite-61DAFB) ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-Le [cahier des charges détaillé](docs/roadmap/CAHIER_DES_CHARGES.md) contient **420 tâches identifiées, 26 chantiers, des dépendances, des critères de sortie et 22 scénarios de recette finale**.
+[English](README.md) · [Français](README.fr.md)
 
-## Ce qui existe dans le dépôt
+## What exists today
 
-| Élément | Emplacement | État |
+| Component | Location | Status |
 |---|---|---|
-| Adaptateur Android (ADB, capture + arbre d’accessibilité, actions typées, saisie Unicode, exclusions caméra/micro/GPS, cycle de vie des émulateurs) | `services/android/android_bridge` | Écrit ; testé en démo ; tests réels dans le job CI `emulator` |
-| Service de contrôle (FastAPI) : appareils, contrôle manuel exclusif, missions, événements SSE rejouables, bibliothèque d’APK, authentification | `services/control/control` | Fonctionne en démo, 19 tests |
-| Interface web française sombre : mur 2×2, prise en main, prompt, missions, APK, journal | `apps/web` | Fonctionne en démo |
-| Image Pod, templates Runpod, diagnostic, contrôle préalable, outil Runpod plafonné | `infra/`, `scripts/` | Écrits, non exécutés sur Runpod |
-| Boucle agent (observer → décider → agir → vérifier) et orchestration des missions | — | **À faire** |
+| Android adapter — ADB, screen capture + accessibility tree, typed actions, Unicode input, camera/mic/GPS exclusion, emulator lifecycle | `services/android/android_bridge` | Implemented; real-device tests in the CI `emulator` job |
+| Control service (FastAPI) — devices, exclusive manual control, missions, replayable SSE events, APK library, auth | `services/control/control` | Runs in demo mode, 19 tests |
+| Web UI — 2×2 live wall, takeover, prompt, missions, APKs, log | `apps/web` | Runs in demo mode |
+| Pod image, RunPod templates, diagnostics, preflight, spend-capped RunPod tool | `infra/`, `scripts/` | Written, not yet run on RunPod |
+| Agent loop (observe → decide → act → verify) and mission orchestration | — | **Next milestone** |
 
-## Démarrer en local (mode démo)
+## Architecture
+
+```mermaid
+flowchart TB
+    UI[React web UI<br/>prompt + 4 live screens] --> API[Control API · FastAPI<br/>missions, SSE events, auth]
+    API --> S[Mission scheduler<br/>exclusive lock per device]
+    S --> W1[Android 1] & W2[Android 2] & W3[Android 3] & W4[Android 4]
+    W1 & W2 & W3 & W4 <--> B[android_bridge<br/>ADB · screenshots · a11y tree]
+    B <--> Q[(Qwen3.6-27B<br/>self-hosted, vision + tools)]
+```
+
+Agent loop: **observe** (screenshot + accessibility tree) → **decide** (Qwen) → **act** (typed ADB action) → **verify**.
+
+## Quick start (demo mode, fake devices)
 
 ```bash
-uv sync
-(cd apps/web && npm ci && npm run build)
-PE_ALLOW_NO_AUTH=1 PE_DEVICE_BACKEND=demo uv run phone-emulator
+git clone https://github.com/Matt95354855/phone_emulator.git
+cd phone_emulator
+uv sync && (cd apps/web && npm ci && npm run build)
+PE_ALLOW_NO_AUTH=1 PE_DEVICE_BACKEND=demo uv run phone-emulator   # http://localhost:8000
+uv run pytest
 ```
 
-Puis ouvrir http://localhost:8000. Tests : `uv run pytest`. Tests sur un vrai Android : `PE_TEST_SERIAL=emulator-5554 uv run pytest -m emulator -o addopts=""`.
-
-## Périmètre confirmé
-
-- Quatre environnements Android persistants, avec installation d’APK téléchargés depuis Internet.
-- Agent qui lit le contenu de l’écran, choisit les actions et vérifie leur résultat.
-- Missions indépendantes en parallèle et mission commune répartie entre appareils.
-- Interface web en français, sombre par défaut, avec prompt, quatre écrans, historique et contrôle manuel.
-- Modèle Qwen3.6-27B officiel (Apache-2.0) avec vision et outils, sans variante modifiée.
-- Accès Android étendu, avec **GPS, caméra et microphone exclus**.
-- Hébergement d’exécution entièrement sur Runpod et démarrage/arrêt manuels.
-- Quatre IP publiques de sortie différentes, réservées et conservées après arrêt/redémarrage.
-- Images de conteneur versionnées et templates Runpod, à construire après validation des prérequis.
-
-## Deux prérequis à prouver
-
-**Android sur Runpod.** Qualifier l’accès à l’accélération et les permissions nécessaires, puis exécuter quatre appareils réels. Runpod ne prend pas en charge Docker Compose ni le lancement d’un Docker interne au Pod ; les images doivent être construites en amont. [Documentation Runpod](https://docs.runpod.io/pods/overview)
-
-**IP fixes de sortie.** Vérifier avec le fournisseur l’allocation et la conservation des quatre sorties, puis les mesurer depuis chaque Android. Plusieurs MAC, IP privées ou Pods ne constituent pas une preuve de quatre sorties publiques fixes. [Réseau Docker](https://docs.docker.com/engine/network/), [ports Runpod](https://docs.runpod.io/pods/configuration/expose-ports)
-
-Ces exigences restent des conditions de livraison. Le cahier des charges distingue explicitement conception proposée et capacités déjà démontrées.
-
-## Architecture proposée
+## Repository structure
 
 ```text
-Interface web française : prompt et quatre écrans
-        │
-API + scheduler de missions + stockage persistant
-        │
-Quatre workers Android avec contrôle exclusif par appareil
-        │
-Observer → décider avec Qwen → agir → observer → vérifier
+apps/web/            React + Vite UI (dark, French)
+services/control/    FastAPI control plane: devices, missions, events, APKs, auth
+services/android/    ADB bridge and emulator lifecycle
+infra/               container images and RunPod templates
+scripts/             pod bootstrap, Android SDK install, preflight, RunPod CLI
+tests/               unit tests + emulator-marked integration tests
+docs/                architecture, roadmap (420 tasks, 26 workstreams), RunPod notes
 ```
 
-Un service Qwen partagé sert plusieurs contextes indépendants. Le premier candidat pour la boucle mobile est [Mobilerun](https://github.com/droidrun/mobilerun), avec [scrcpy](https://github.com/Genymobile/scrcpy) pour le transport Android et une passerelle navigateur à qualifier. Les choix définitifs seront consignés après prototype ; le produit n’empile pas plusieurs harnesses concurrents.
+## Engineering approach
 
-## Ordre de réalisation
+The project is planned before it is claimed: a [specification](docs/roadmap/CAHIER_DES_CHARGES.md) with **420 tasks, 26 workstreams, dependencies, exit criteria and 22 acceptance scenarios**. Two hard prerequisites are tracked explicitly — running four accelerated Androids on RunPod and four fixed public egress IPs — and nothing is reported as working until it is measured. GPS, camera and microphone are excluded by design; APKs, model weights, accounts and private captures stay out of the repository.
 
-1. Faisabilité Runpod et quatre sorties fixes.
-2. Un Android avec APK, outils, écran en direct et capteurs exclus.
-3. Une mission Qwen réussie sur un contenu d’écran variable.
-4. Quatre appareils, isolation et deux modes de mission.
-5. Interface complète, persistance, images et installation reproductible.
-6. Procédures réutilisables et replay avancé.
+## Documentation
 
-La documentation publique contient les spécifications et futures preuves expurgées. APK d’exploitation, poids de modèle, disques Android, comptes, secrets et captures privées restent hors du dépôt.
+[Detailed guide (FR)](docs/GUIDE.fr.md) · [Architecture](docs/architecture) · [Roadmap](docs/roadmap) · [RunPod](docs/runpod)
