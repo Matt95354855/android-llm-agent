@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Amorce un Pod Runpod Ubuntu standard (sans notre image) pour tester une branche rapidement.
-#   curl -fsSL https://raw.githubusercontent.com/Matt95354855/phone_emulator/<branche>/scripts/bootstrap_dev_pod.sh | bash -s -- <branche>
+#   curl -fsSL https://raw.githubusercontent.com/Matt95354855/android-llm-agent/<branche>/scripts/bootstrap_dev_pod.sh | bash -s -- <branche>
 # Étapes : diagnostic → dépendances → code → SDK Android (si licences acceptées) → service en arrière-plan.
 set -euo pipefail
 BRANCH="${1:-main}"
@@ -20,7 +20,7 @@ command -v node >/dev/null || { curl -fsSL https://deb.nodesource.com/setup_20.x
 
 echo "== Code ($BRANCH)"
 if [[ -d $APP/.git ]]; then git -C $APP fetch -q origin "$BRANCH" && git -C $APP checkout -q -B "$BRANCH" "origin/$BRANCH"
-else git clone -q --branch "$BRANCH" https://github.com/Matt95354855/phone_emulator.git $APP; fi
+else git clone -q --branch "$BRANCH" https://github.com/Matt95354855/android-llm-agent.git $APP; fi
 cd $APP
 bash scripts/runpod_diag.sh >/dev/null 2>&1 || true
 echo "   rapport de diagnostic : /diag/report.txt"

@@ -1,8 +1,8 @@
-# phone_emulator — un agent LLM qui pilote quatre Android
+# Android LLM Agent — un prompt, quatre Android
 
 **Plateforme web pour exécuter des missions sur quatre émulateurs Android à partir d'un seul prompt, avec un LLM de vision auto-hébergé (Qwen3.6-27B) qui lit l'écran, agit et vérifie.** Mur d'écrans 2×2 en direct, prise en main manuelle exclusive, bibliothèque d'APK et journal d'événements rejouable.
 
-[![CI](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml/badge.svg)](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/Python-3.11-3776AB) ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688) ![React](https://img.shields.io/badge/UI-React%20%2B%20Vite-61DAFB) ![Status](https://img.shields.io/badge/statut-en%20développement-orange)
+[![CI](https://github.com/Matt95354855/android-llm-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Matt95354855/android-llm-agent/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/Python-3.11-3776AB) ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688) ![React](https://img.shields.io/badge/UI-React%20%2B%20Vite-61DAFB) ![Status](https://img.shields.io/badge/statut-en%20développement-orange)
 
 [English](README.md) · [Français](README.fr.md)
 
@@ -32,8 +32,8 @@ Boucle agent : **observer** (capture + arbre d'accessibilité) → **décider** 
 ## Démarrage rapide (mode démo, appareils factices)
 
 ```bash
-git clone https://github.com/Matt95354855/phone_emulator.git
-cd phone_emulator
+git clone https://github.com/Matt95354855/android-llm-agent.git
+cd android-llm-agent
 uv sync && (cd apps/web && npm ci && npm run build)
 PE_ALLOW_NO_AUTH=1 PE_DEVICE_BACKEND=demo uv run phone-emulator   # http://localhost:8000
 uv run pytest

@@ -1,8 +1,8 @@
-# phone_emulator — LLM agent driving four Android devices
+# Android LLM Agent — one prompt, four Android devices
 
 **A web platform to run missions on four Android emulators from a single prompt, with a self-hosted vision LLM (Qwen3.6-27B) that reads the screen, acts and verifies.** Live 2×2 screen wall, exclusive manual takeover, APK library and replayable event log.
 
-[![CI](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml/badge.svg)](https://github.com/Matt95354855/phone_emulator/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/Python-3.11-3776AB) ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688) ![React](https://img.shields.io/badge/UI-React%20%2B%20Vite-61DAFB) ![Status](https://img.shields.io/badge/status-in%20development-orange)
+[![CI](https://github.com/Matt95354855/android-llm-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/Matt95354855/android-llm-agent/actions/workflows/ci.yml) ![Python](https://img.shields.io/badge/Python-3.11-3776AB) ![FastAPI](https://img.shields.io/badge/API-FastAPI-009688) ![React](https://img.shields.io/badge/UI-React%20%2B%20Vite-61DAFB) ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
 [English](README.md) · [Français](README.fr.md)
 
@@ -32,8 +32,8 @@ Agent loop: **observe** (screenshot + accessibility tree) → **decide** (Qwen) 
 ## Quick start (demo mode, fake devices)
 
 ```bash
-git clone https://github.com/Matt95354855/phone_emulator.git
-cd phone_emulator
+git clone https://github.com/Matt95354855/android-llm-agent.git
+cd android-llm-agent
 uv sync && (cd apps/web && npm ci && npm run build)
 PE_ALLOW_NO_AUTH=1 PE_DEVICE_BACKEND=demo uv run phone-emulator   # http://localhost:8000
 uv run pytest
